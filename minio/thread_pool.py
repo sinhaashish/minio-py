@@ -91,4 +91,3 @@ class ThreadPool:
         if not self.exceptions_queue.empty():
             raise self.exceptions_queue.get()
         return self.results_queue
-

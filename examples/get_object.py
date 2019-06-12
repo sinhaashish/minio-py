@@ -19,13 +19,13 @@
 from minio import Minio
 from minio.error import ResponseError
 
-client = Minio('s3.amazonaws.com',
-               access_key='YOUR-ACCESSKEYID',
-               secret_key='YOUR-SECRETACCESSKEY')
+client = Minio('192.168.86.168:9000',
+               access_key='minio',
+               secret_key='minio123', secure=False)
 
 # Get a full object
 try:
-    data = client.get_object('my-bucketname', 'my-objectname')
+    data = client.get_object('sinha', 'book.txt')
     with open('my-testfile', 'wb') as file_data:
         for d in data.stream(32*1024):
             file_data.write(d)

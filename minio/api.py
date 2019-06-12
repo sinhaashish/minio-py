@@ -90,7 +90,8 @@ from .signer import (_UNSIGNED_PAYLOAD, _SIGN_V4_ALGORITHM)
 from .xml_marshal import (xml_marshal_bucket_constraint,
                           xml_marshal_complete_multipart_upload,
                           xml_marshal_bucket_notifications,
-                          xml_marshal_delete_objects)
+                          xml_marshal_delete_objects,
+                          xml_marshal_select_object_content)
 from .fold_case_dict import FoldCaseDict
 from .thread_pool import ThreadPool
 
@@ -1434,6 +1435,39 @@ class Minio(object):
                                  bucket_name=post_policy.form_data['bucket'],
                                  bucket_region=region)
         return (url_str, post_policy.form_data)
+
+################################ Select-Object Starts ################################
+    def select_object_content(self, bucket_name, object_name, opts):
+        """
+        Retrieves an object from a bucket.
+
+        This function returns an object that contains an open network
+        connection to enable incremental consumption of the
+        response. To re-use the connection (if desired) on subsequent
+        requests, the user needs to call `release_conn()` on the
+        returned object after processing.
+
+        Examples:
+            my_object = minio.get_partial_object('foo', 'bar')
+
+        :param bucket_name: Bucket to read object from
+        :param object_name: Name of object to read
+        :param request_headers: Any additional headers to be added with GET request.
+        :return: :class:`urllib3.response.HTTPResponse` object.
+
+        """
+        is_valid_bucket_name(bucket_name)
+        is_non_empty_string(object_name)
+        print("ashish")
+
+                # response = self._url_open('POST', bucket_name=bucket_name,
+                #                   object_name=object_name,
+                #                   query={'uploadId': upload_id},
+                #                   headers=headers, body=data,
+                #                   content_sha256=sha256_hex)
+
+
+################################ Select-Object Ends ################################
 
     # All private functions below.
     def _get_partial_object(self, bucket_name, object_name,

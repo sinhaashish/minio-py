@@ -19,12 +19,13 @@
 from minio import Minio
 from minio.error import ResponseError
 
-client = Minio('s3.amazonaws.com',
-               access_key='YOUR-ACCESSKEYID',
-               secret_key='YOUR-SECRETACCESSKEY')
+client = Minio('localhost:9000',
+               access_key='minio',
+               secret_key='minio123',
+               secure=False)
 
 # Make a new bucket
 try:
-    client.make_bucket('my-bucketname')
+    client.make_bucket('my-bucketname', 'us-west-1')
 except ResponseError as err:
     print(err)

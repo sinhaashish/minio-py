@@ -31,6 +31,8 @@ from xml.etree import ElementTree as s3_xml
 
 _S3_NAMESPACE = 'http://s3.amazonaws.com/doc/2006-03-01/'
 
+_S3_HEADER = '<?xml version="1.0" encoding="UTF-8"?>' + '\n'
+
 
 def xml_marshal_bucket_constraint(region):
     """
@@ -44,6 +46,7 @@ def xml_marshal_bucket_constraint(region):
     location_constraint.text = region
     data = io.BytesIO()
     s3_xml.ElementTree(root).write(data, encoding=None, xml_declaration=False)
+    print(data.getvalue())
     return data.getvalue()
 
 
@@ -223,3 +226,9 @@ def xml_marshal_delete_objects(object_names):
     data = io.BytesIO()
     s3_xml.ElementTree(root).write(data, encoding=None, xml_declaration=False)
     return data.getvalue()
+
+
+
+
+
+def xml_marshal_select_object_content()

@@ -47,6 +47,73 @@ def xml_marshal_bucket_constraint(region):
     return data.getvalue()
 
 
+def xml_marshal_select(opts):
+    root = s3_xml.Element('SelectObjectContentRequest')
+    expression = s3_xml.SubElement(root, 'Expression')
+    expression.text = opts.expression
+    expression_type = s3_xml.SubElement(root, 'ExpressionType')
+    expression_type.text = 'SQL'
+    input_serialization = s3_xml.SubElement(root, 'InputSerialization')
+
+    if opts.in_ser.csv_input is not None:
+        compression_type = s3_xml.SubElement(input_serialization, 'CompressionType')  
+        compression_type.text = opts.in_ser.compression_type
+        csv = s3_xml.SubElement(input_serialization, 'CSV')
+        file_header_info = s3_xml.SubElement(csv, 'FileHeaderInfo')
+        file_header_info.text = opts.in_ser.csv_input.FileHeaderInfo
+        record_delimiter = s3_xml.SubElement(csv, 'RecordDelimiter')
+        record_delimiter.text = opts.in_ser.csv_input.RecordDelimiter
+        field_delimiter = s3_xml.SubElement(csv, 'FieldDelimiter')
+        field_delimiter.text = opts.in_ser.csv_input.FieldDelimiter
+        quote_charachter = s3_xml.SubElement(csv, 'QuoteCharacter')
+        quote_charachter.text = opts.in_ser.csv_input.QuoteCharacter
+        quote_escape_charachter = s3_xml.SubElement(csv, 'QuoteEscapeCharacter')
+        quote_escape_charachter.text = opts.in_ser.csv_input.QuoteEscapeCharacter
+        comments = s3_xml.SubElement(csv, 'Comments')
+        comments.text = opts.in_ser.csv_input.Comments
+        allow_quoted_record_delimiter = s3_xml.SubElement(csv, 'AllowQuotedRecordDelimiter')
+        allow_quoted_record_delimiter.text = opts.in_ser.csv_input.AllowQuotedRecordDelimiter
+    
+    if opts.in_ser.json_input is not None:
+        compression_type = s3_xml.SubElement(input_serialization, 'CompressionType')
+        compression_type.text = opts.in_ser.compression_type
+        json = s3_xml.SubElement(input_serialization, 'JSON')
+        type_input = s3_xml.SubElement(json, 'Type')
+        type_input.text = opts.in_ser.json_input.Type
+
+    if opts.in_ser.parquet_input is not None:
+        compression_type = s3_xml.SubElement(input_serialization, 'CompressionType')
+        compression_type.text = opts.in_ser.compression_type
+        s3_xml.SubElement(input_serialization, 'Parquet')
+
+
+    output_serialization = s3_xml.SubElement(root, 'OutputSerialization')
+    if opts.out_ser.csv_output is not None:
+        csv = s3_xml.SubElement(output_serialization, 'CSV')
+        quote_field = s3_xml.SubElement(csv, 'QuoteFields')
+        quote_field.text = opts.out_ser.csv_output.QuoteFields
+        record_delimiter = s3_xml.SubElement(csv, 'RecordDelimiter')
+        record_delimiter.text = opts.out_ser.csv_output.RecordDelimiter
+        field_delimiter = s3_xml.SubElement(csv, 'FieldDelimiter')
+        field_delimiter.text = opts.out_ser.csv_output.FieldDelimiter
+        quote_charachter = s3_xml.SubElement(csv, 'QuoteCharacter')
+        quote_charachter.text = opts.out_ser.csv_output.QuoteCharacter
+        quote_escape_charachter = s3_xml.SubElement(csv, 'QuoteEscapeCharacter')
+        quote_escape_charachter.text = opts.out_ser.csv_output.QuoteEscapeCharacter
+
+    if opts.out_ser.json_output is not None:
+        json = s3_xml.SubElement(output_serialization, 'JSON')
+        record_delimiter = s3_xml.SubElement(json, 'RecordDelimiter')
+        record_delimiter.text = opts.out_ser.json_output.RecordDelimiter
+
+    request_progress = s3_xml.SubElement(root, 'RequestProgress')
+    enabled = s3_xml.SubElement(request_progress, 'Enabled')
+    enabled.text = opts.req_progress.enabled
+
+    data = io.BytesIO()
+    s3_xml.ElementTree(root).write(data, encoding=None, xml_declaration=False)
+    return data.getvalue()
+
 def xml_marshal_complete_multipart_upload(uploaded_parts):
     """
     Marshal's complete multipart upload request based on *uploaded_parts*.

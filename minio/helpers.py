@@ -55,6 +55,17 @@ MAX_POOL_SIZE = 10
 MIN_PART_SIZE = 5 * 1024 * 1024  # 5MiB
 DEFAULT_PART_SIZE = MIN_PART_SIZE # Currently its 5MiB
 
+READ_BUFFER_SELECT = 32 * 1024 # Buffer size for select object content
+CONS_READ_SIZE = 4 # total byte length, header byte length , CRC are 
+                   # 4 bytes in S3 select response
+SQL = 'SQL'
+RECORDS = 'Records'
+PROGRESS = 'Progress'
+STATS ='Stats'
+EVENT = 'event'
+END = 'End'
+ERROR = 'error'
+
 _VALID_BUCKETNAME_REGEX = re.compile('^[a-z0-9][a-z0-9\\.\\-]+[a-z0-9]$')
 _ALLOWED_HOSTNAME_REGEX = re.compile(
     '^((?!-)(?!_)[A-Z_\\d-]{1,63}(?<!-)(?<!_)\\.)*((?!_)(?!-)[A-Z_\\d-]{1,63}(?<!-)(?<!_))$',
@@ -696,3 +707,18 @@ def is_supported_header(key):
 # returns true if header is a storage class header
 def is_storageclass_header(key):
     return key.lower() == "x-amz-storage-class"
+
+ # return the input type if valid i.e. csv, json,  parquet, par 
+ # or raise an InvalidArgumentError 
+def is_valid_input_type(object_name):
+    if  object_name.__contains__('.csv')  |  object_name.__contains__('.CSV') :
+        return 'csv'
+    elif  object_name.__contains__('.json') | object_name.__contains__('.JSON') :
+        return 'json'
+    elif   object_name.__contains__('.parquet') | object_name.__contains__('.par') :
+        return 'parquet'
+    else:
+        raise InvalidArgumentError('Input type not supported '
+                                   ' Only csv, json and parquet.')    
+
+

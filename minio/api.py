@@ -76,7 +76,7 @@ from .helpers import (get_target_url, is_non_empty_string,
                       is_valid_source_sse_object,
                       is_valid_bucket_notification_config, is_valid_policy_type,
                       mkdir_p, dump_http, amzprefix_user_metadata,
-                      is_supported_header,is_amz_header)
+                      is_supported_header,is_amz_header,is_valid_input_type)
 from .helpers import (MAX_MULTIPART_OBJECT_SIZE,
                       MAX_PART_SIZE,
                       MAX_POOL_SIZE,
@@ -90,7 +90,9 @@ from .signer import (_UNSIGNED_PAYLOAD, _SIGN_V4_ALGORITHM)
 from .xml_marshal import (xml_marshal_bucket_constraint,
                           xml_marshal_complete_multipart_upload,
                           xml_marshal_bucket_notifications,
-                          xml_marshal_delete_objects)
+                          xml_marshal_delete_objects,
+                          xml_marshal_select)
+from .select_object import (extract_message)
 from .fold_case_dict import FoldCaseDict
 from .thread_pool import ThreadPool
 
@@ -234,6 +236,41 @@ class Minio(object):
         Disable HTTP trace.
         """
         self._trace_output_stream = None
+
+
+    def select_object_content(self, bucket_name,
+                        object_name,
+                        obj):
+
+        '''
+        Select from object
+        '''        
+        is_valid_bucket_name(bucket_name)
+        is_non_empty_string(object_name)
+        is_valid_input_type(object_name)
+
+        content = xml_marshal_select(obj)
+        url_values = dict()
+        url_values["select"] = ""
+        url_values["select-type"] = "2"
+
+        headers = {
+            'Content-Length': str(len(content)),
+            'Content-Md5': get_md5_base64digest(content)
+        }
+        content_sha256_hex = get_sha256_hexdigest(content)
+        response = self._url_open(
+            'POST',
+            bucket_name=bucket_name,
+            object_name=object_name,
+            query=url_values,
+            headers=headers,
+            body=content,
+            content_sha256=content_sha256_hex,
+            preload_content=False)
+
+        return extract_message(response)
+          
 
     # Bucket level
     def make_bucket(self, bucket_name, location='us-east-1'):

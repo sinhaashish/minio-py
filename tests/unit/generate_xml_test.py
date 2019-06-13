@@ -18,7 +18,15 @@ from nose.tools import eq_
 
 from minio.definitions import UploadPart
 from minio.xml_marshal import (xml_marshal_bucket_constraint,
-                               xml_marshal_complete_multipart_upload)
+                               xml_marshal_complete_multipart_upload,
+                               xml_marshal_select)
+from minio.select_object_options import (SelectObjectOptions,
+                                        CSVInput,
+                                        RequestProgress, 
+                                        InputSerialization,
+                                        OutputSerialization,
+                                        CSVOutput)
+
 
 class GenerateRequestTest(TestCase):
     def test_generate_bucket_constraint(self):
@@ -45,4 +53,45 @@ class GenerateRequestTest(TestCase):
                             None, 0),
         ]
         actual_string = xml_marshal_complete_multipart_upload(etags)
+        eq_(expected_string, actual_string)
+
+    def test_xml_marshal_select(self):
+        expected_string =   b'<SelectObjectContentRequest><Expression> select * from s3object</Expression>' \
+                            b'<ExpressionType>SQL</ExpressionType><InputSerialization>' \
+                            b'<CompressionType>NONE</CompressionType>' \
+                            b'<CSV><FileHeaderInfo>USE</FileHeaderInfo><RecordDelimiter>\n</RecordDelimiter><FieldDelimiter>,</FieldDelimiter>' \
+                            b'<QuoteCharacter>"</QuoteCharacter><QuoteEscapeCharacter>"</QuoteEscapeCharacter><Comments>#</Comments>' \
+                            b'<AllowQuotedRecordDelimiter>FALSE</AllowQuotedRecordDelimiter></CSV></InputSerialization>' \
+                            b'<OutputSerialization><CSV><QuoteFields>ASNEEDED</QuoteFields>' \
+                            b'<RecordDelimiter>\n</RecordDelimiter><FieldDelimiter>,</FieldDelimiter>' \
+                            b'<QuoteCharacter>"</QuoteCharacter><QuoteEscapeCharacter>"</QuoteEscapeCharacter></CSV></OutputSerialization>' \
+                            b'<RequestProgress><Enabled>TRUE</Enabled></RequestProgress></SelectObjectContentRequest>'
+
+
+        obj = SelectObjectOptions(
+            expression=" select * from s3object",
+            input_serialization = InputSerialization(compression_type="NONE",
+                                    csv=CSVInput(FileHeaderInfo="USE",
+                                                RecordDelimiter="\n",
+                                                FieldDelimiter=",",
+                                                QuoteCharacter='"',
+                                                QuoteEscapeCharacter='"',
+                                                Comments="#",
+                                                AllowQuotedRecordDelimiter="FALSE"
+                                                ),
+                                    ),
+            output_serialization=OutputSerialization(
+                            csv = CSVOutput(
+                                QuoteFields="ASNEEDED",
+                                RecordDelimiter="\n",
+                                FieldDelimiter=",",
+                                QuoteCharacter='"',
+                                QuoteEscapeCharacter='"',
+                                )
+                            ),
+            request_progress=RequestProgress(
+                enabled="TRUE"
+                )
+            )
+        actual_string = xml_marshal_select(obj)
         eq_(expected_string, actual_string)

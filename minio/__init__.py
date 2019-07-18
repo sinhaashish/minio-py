@@ -38,3 +38,4 @@ from .error import ResponseError
 from .post_policy import PostPolicy
 from .copy_conditions import CopyConditions
 from .definitions import Bucket, Object
+from .select_object_reader import SelectObjectReader

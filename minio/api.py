@@ -259,7 +259,7 @@ class Minio(object):
             'Content-Md5': get_md5_base64digest(content)
         }
         content_sha256_hex = get_sha256_hexdigest(content)
-        response = self._url_open(
+        return  self._url_open(
             'POST',
             bucket_name=bucket_name,
             object_name=object_name,
@@ -269,7 +269,7 @@ class Minio(object):
             content_sha256=content_sha256_hex,
             preload_content=False)
 
-        return extract_message(response)
+        # return extract_message(response)
           
 
     # Bucket level

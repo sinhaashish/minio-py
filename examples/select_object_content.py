@@ -17,9 +17,11 @@
 # my-testfile are dummy values, please replace them with original values.
 
 from minio import Minio
+from minio import SelectObjectReader
 from minio.error import ResponseError
 from minio.select_object import CRCValidationError
 from minio.select_object_options import (SelectObjectOptions, CSVInput, JSONInput, RequestProgress, ParquetInput, InputSerialization, OutputSerialization, CSVOutput, JsonOutput)
+
 # client = Minio('s3.amazonaws.com',
 #                access_key='YOUR-ACCESSKEY',
 #                secret_key='YOUR-SECRETKEY')
@@ -67,11 +69,20 @@ obj = SelectObjectOptions(
     )
 
 try:
-    records, stats = client.select_object_content('sinha', '15Lakh.csv', obj)
-    with open('/home/ashish/select_result/my-record', 'wb') as record_data:
-        record_data.write(records)
-    with open('/home/ashish/select_result/my-stat', 'wb') as stat_data:
-        stat_data.write(stats)
+    response = client.select_object_content('sinha', 'test.csv', obj)
+    t = SelectObjectReader(response)
+    while True :
+        records = t.read(150)
+        print("ashish" ,records)
+        if records == "" :
+            break
+        
+
+    # records, stats = client.select_object_content('sinha', 'test.csv', obj)
+    # with open('/home/ashish/select_result/my-record', 'wb') as record_data:
+    #     record_data.write(records)
+    # with open('/home/ashish/select_result/my-stat', 'wb') as stat_data:
+    #     stat_data.write(stats)
 except CRCValidationError as err:
     print(err)
 except ResponseError as err:
